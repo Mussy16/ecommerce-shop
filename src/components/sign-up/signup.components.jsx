@@ -1,42 +1,59 @@
 import { useState } from "react";
-import { creatAuthWithUserEmailAndPassword } from "../../utils/firebase/firebase.utils";
+import FormInput from "../form-input/form-input.component";
+import './sign-up.styles.scss';
+import { createAuthWithUserEmailAndPassword ,createUserDocumentFromAuth} from "../../utils/firebase/firebase.utils";
 
 const defaltForm = {
 
     displayName:'',
     email:'',
     password:'',
-    confirmPassword:''
+    confirmPassword:'',
 }
 
 const SignUp = ()=>{
     const [formFields,setFormFields] = useState(defaltForm);
-    const {displayName,email,password,confrimPassword} = formFields;
+    const {displayName,email,password,confirmPassword} = formFields;
+     console.log(formFields)
 
-    console.log(formFields)
-    
+     const resetFormFieds = ()=>{
+       setFormFields(defaltForm)
+     }
+   const handleSubmit =  async (event)=>{
+      event.preventDefault();
+      if(password !== confirmPassword){
+        alert("your password do not match")
+        return;
+      }
+      try{
+        const {user} = createAuthWithUserEmailAndPassword(email,password);
+        await createUserDocumentFromAuth(user,{displayName})
+        resetFormFieds()
+      }catch(error){
+        if(error.code  == 'auth/email-already-in-use'){
+          alert("cannot create acount email alredy in use")
+        }else{
+          console.log("user account creation encountred and error",error)
+        }
+      }
+   }
     const handleChange = (event)=>{
      const{name,value} = event.target;
 
      setFormFields({...formFields,[name]:value})
     }
-  return(
-    <div>
-        <h1>Sign Up with your email and password</h1>
-        <form onSubmit={()=>{}}>
-            <label>Display name</label>
-            <input type="text"onChange={handleChange} name="displayName" value={displayName}required></input>
-            <label>Email</label>
-            <input type="email" onChange={handleChange} name="email" value={email}required></input>
-            <label>Password</label>
-            <input type=""required></input>
-            <label>Confirm Password</label>
-            <input type="password" onChange={handleChange} name="password" value={password}required></input>
-            <label></label>
-            <input type="password"onChange={handleChange} name="confirmPassword" value={confrimPassword}required></input>
-            <button type="submit">Sign Up</button>
-        </form>
-    </div>
-  )
-}
+    return(
+      <div className="sign-up-container">
+         <h2>Dont have an account?</h2>
+          <span>Sign Up with your email and password</span>
+          <form onSubmit={handleSubmit}>
+              <FormInput type="text" lable ="Display name" onChange={handleChange} name="displayName" value={displayName}required/>
+              <FormInput type="email" lable= "Email" onChange={handleChange} name="email" value={email}required/>
+              <FormInput type="password" lable= "Password" onChange={handleChange} name="password" value={password}required/>
+              <FormInput type="password" lable = "Confirm Password"onChange={handleChange} name="confirmPassword" value={confirmPassword}required/>
+              <button type="submit">Sign Up</button>
+          </form>
+      </div>
+    )
+    }
 export default SignUp;

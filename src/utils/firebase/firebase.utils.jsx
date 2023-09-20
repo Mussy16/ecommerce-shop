@@ -23,7 +23,7 @@ const firebaseConfig = {
   export const signInWithGoogleRedirect = ()=> signInWithRedirect(auth,googleProvider);
 
   export const db = getFirestore();
-   export const createUserDocumentFromAuth = async (userAuth)=>{
+   export const createUserDocumentFromAuth = async (userAuth,additionalInformation = {})=>{
     if(!userAuth) return;
      const userDocRef = doc(db,'users',userAuth.uid);
 
@@ -37,7 +37,7 @@ const firebaseConfig = {
       const{displayName, email} = userAuth;
       const createdAt = new Date();
       try{
-        await setDoc(userDocRef,{displayName,email,createdAt})
+        await setDoc(userDocRef,{displayName,email,createdAt,...additionalInformation})
       }
       catch(error){
         console.log('there was an eeror creating the user', error.message)
@@ -45,8 +45,8 @@ const firebaseConfig = {
      }
      return userDocRef;
   }
-  export const creatAuthWithUserEmailAndPassword = async (email,password)=>{
+  export const createAuthWithUserEmailAndPassword = async (email,password)=>{
     if(!email|| !password) return
 
-    return await creatAuthWithUserEmailAndPassword(auth,email,password)
+    return await createUserWithEmailAndPassword(auth,email,password)
   }
